@@ -15,7 +15,5 @@ namespace GymApi.DTOs
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = "User";
-        public string? MembershipTypeName { get; set; } // e.g., "Standart"
-        public string? MembershipTypeCode { get; set; } // e.g., "ST"[cite: 1]
     }
 }
