@@ -2,6 +2,7 @@ using System.Text;
 using GymApi.Data;
 using GymApi.Models;
 using GymApi.Service;
+using GymApi.Service.Impl;
 using GymApi.Services;
 using GymApi.Services.Impl;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -103,6 +104,7 @@ builder.Services.AddAuthentication(options =>
 
 // Dependency Injection Registrations
 builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
+builder.Services.AddScoped<IAppUserService,AppUserServiceImpl>();
 
 var app = builder.Build();
 

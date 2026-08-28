@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GymApi.Data
 {
+    //admin generator when starting the app
     public static class DbInitializer
     {
         public static async Task SeedAsync(IServiceProvider serviceProvider)
