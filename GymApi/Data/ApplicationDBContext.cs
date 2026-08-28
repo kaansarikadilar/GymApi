@@ -11,19 +11,34 @@ namespace GymApi.Data
             : base(options)
         {
         }
-        public DbSet<Member> Members { get; set; }
 
+        public DbSet<Member> Members { get; set; }
         public DbSet<MembershipTypes> MembershipTypes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Enforce unique database index for MemberCode[cite: 1]
+            // Enforce unique database index for MemberCode
             builder.Entity<Member>()
                 .HasIndex(m => m.MemberCode)
                 .IsUnique();
 
-            // Seed default membership types[cite: 1]
+            // 1. Map the Member to their AppUser account (1-to-1)
+            builder.Entity<Member>()
+                .HasOne(m => m.AppUser)
+                .WithOne()
+                .HasForeignKey<Member>(m => m.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 2. Map the Member to their Assigned Trainer (Many-to-1)
+            builder.Entity<Member>()
+                .HasOne(m => m.AssignedTrainer)
+                .WithMany()
+                .HasForeignKey(m => m.AssignedTrainerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Seed default membership types
             builder.Entity<MembershipTypes>().HasData(
                 new MembershipTypes { Id = 1, Name = "Standart", Code = "ST" },
                 new MembershipTypes { Id = 2, Name = "VIP", Code = "VP" },

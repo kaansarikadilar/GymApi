@@ -1,6 +1,8 @@
 using System.Text;
 using GymApi.Data;
 using GymApi.Models;
+using GymApi.Repository;
+using GymApi.Repository.Impl;
 using GymApi.Service;
 using GymApi.Service.Impl;
 using GymApi.Services;
@@ -105,6 +107,9 @@ builder.Services.AddAuthentication(options =>
 // Dependency Injection Registrations
 builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddScoped<IAppUserService,AppUserServiceImpl>();
+builder.Services.AddScoped<IMemberService,MemberServiceImpl>();
+builder.Services.AddScoped<IMemberRepository,MemberRepositoryImpl>();
+
 
 var app = builder.Build();
 
