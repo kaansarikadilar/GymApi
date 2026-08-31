@@ -13,8 +13,6 @@ namespace GymApi.DTOs.Member
         [MinLength(1, ErrorMessage = "Last Name must be at least 1 characters long.")]
         [MaxLength(50,ErrorMessage ="Last Name must be at most 50 characters")]
         public string LastName { get; set; } = string.Empty;
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
-        public string? Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "MembershipTypeId is required.")]
         public int MembershipTypeId { get; set; }

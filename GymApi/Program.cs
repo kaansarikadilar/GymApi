@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using Refit;
+using GymApi.Modules.Barcode.Clients;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -60,6 +62,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddDbContext<BarcodeDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("BarcodeConnection")));
 
 // Identity Setup
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -109,6 +113,12 @@ builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddScoped<IAppUserService,AppUserServiceImpl>();
 builder.Services.AddScoped<IMemberService,MemberServiceImpl>();
 builder.Services.AddScoped<IMemberRepository,MemberRepositoryImpl>();
+builder.Services
+    .AddRefitClient<IMemberApiClient>()
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri("http://localhost:5082"); // Set to your running application port
+    });
 
 
 var app = builder.Build();

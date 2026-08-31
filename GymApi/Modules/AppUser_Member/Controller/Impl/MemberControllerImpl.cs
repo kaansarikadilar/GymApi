@@ -31,6 +31,7 @@ namespace GymApi.Controller.Impl
             return CreatedAtAction(nameof(GetMemberById), new { id = creatingUser.Id }, creatingUser);
         }
         [HttpPut("by-email/{email}")]
+        [Authorize]
          public async Task<IActionResult> UpdateMember(string email, [FromBody] UpdateMemberRequest request)
         {
             if (!ModelState.IsValid)
@@ -45,7 +46,7 @@ namespace GymApi.Controller.Impl
             return CreatedAtAction(nameof(GetMemberById), new { id = updatingMember.Id }, updatingMember);
         }
         [HttpDelete("by-email/{email}")]
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> DeleteMember(string email)
         {
             var isDeleted = await _memberService.DeleteMemberAsync(email);
