@@ -15,6 +15,9 @@ using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Refit;
 using GymApi.Modules.Barcode.Clients;
+using GymApi.Modules.Barcode.Repository;
+using GymApi.Modules.Barcode.Service;
+using GymApi.Modules.Barcode.Service.BarcodeServiceImpl;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -113,12 +116,16 @@ builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddScoped<IAppUserService,AppUserServiceImpl>();
 builder.Services.AddScoped<IMemberService,MemberServiceImpl>();
 builder.Services.AddScoped<IMemberRepository,MemberRepositoryImpl>();
+builder.Services.AddScoped<IBarcodeRepository, BarcodeRepositoryImpl>();
+builder.Services.AddScoped<IBarcodeService,BarcodeServiceImpl>();
+
+
+builder.Services
+    .AddRefitClient<IBarcodeApiClient>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:5082")); // Standalone Barcode server URL
 builder.Services
     .AddRefitClient<IMemberApiClient>()
-    .ConfigureHttpClient(c =>
-    {
-        c.BaseAddress = new Uri("http://localhost:5082"); // Set to your running application port
-    });
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:5082")); // Standalone Barcode server URL
 
 
 var app = builder.Build();

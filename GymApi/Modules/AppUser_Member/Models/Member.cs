@@ -14,14 +14,14 @@ namespace GymApi.Models
         public string MemberCode { get; set; } = string.Empty;
 
         // Foreign key linking to MembershipType (ST, VP, OG) enums
-        public int MembershipTypeId { get; set; }
+        public int MembershipTypeId { get; set; } //ST,VP,OG,KR
         public MembershipTypes? MembershipType { get; set; }
 
         // Duration quantity (e.g., 1, 3, 12)
-        public int DurationValue { get; set; } 
+        public int DurationValue { get; set; }  //zaman
 
         // Unit type (Day, Month, Year)
-        public DurationUnit DurationUnit { get; set; }
+        public DurationUnit DurationUnit { get; set; } 
 
         // Optional link to an assigned Personal Trainer
         public string? AssignedTrainerId { get; set; }

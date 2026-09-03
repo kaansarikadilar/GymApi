@@ -75,11 +75,11 @@ namespace GymApi.Repository.Impl
 
         public async Task<Member?> GetMemberByEmail(string email)
         {
-            return await _context.Members
-            .Include(m=>m.AppUser)
-            .Include(m=>m.MembershipType)
-            .Include(m=>m.AssignedTrainer)
-            .FirstOrDefaultAsync(m=>m.AppUser!.Email == email);
+         return await _context.Members
+        .Include(m => m.AppUser)
+        .Include(m => m.MembershipType)
+        .Include(m => m.AssignedTrainer)
+        .FirstOrDefaultAsync(m => m.AppUser!.Email == email);
         }
     }
 }

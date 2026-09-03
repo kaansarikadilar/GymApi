@@ -1,11 +1,13 @@
 using GymApi.DTOs.Member;
 using GymApi.Models;
+using GymApi.Modules.Barcode.DTOs;
 
 namespace GymApi.Mappers
 {
     public static class MemberMapper
     {
-        public static MemberResponse ToMemberResponse(this Member member)
+        public static MemberResponse ToMemberResponseFromCreate(this Member member,
+                                                     IEnumerable<BarcodeResponse> barcodes)
         {
             return new MemberResponse
             {
@@ -14,10 +16,38 @@ namespace GymApi.Mappers
                 AppUserName = member.AppUser!.FirstName + member.AppUser.LastName,
                 Email = member.AppUser.Email!,
                 MemberCode = member.MemberCode,
-                MembershipType = member.MembershipType!.Name,
+                MembershipType = member.MembershipType!.Name ?? string.Empty,
                 AssignedTrainerName = member.AssignedTrainer != null 
+                
                     ? $"{member.AssignedTrainer.FirstName} {member.AssignedTrainer.LastName}" 
                     : null,
+                DurationValue = member.DurationValue,
+                MembershipTypeCode = member.MembershipType.Code ?? string.Empty,
+                DurationUnit = member.DurationUnit,
+                AssignedTrainerId = member.AssignedTrainerId,
+                DurationFormatted = $"{member.DurationValue} {member.DurationUnit}",
+                StartDate = member.StartDate,
+                EndDate = member.EndDate,
+                Barcodes = barcodes ?? Enumerable.Empty<BarcodeResponse>()
+            };
+        }
+         public static MemberResponse ToMemberResponse(this Member member)
+        {
+            return new MemberResponse
+            {
+                Id = member.Id,
+                FullName = member.FirstName + " " +member.LastName,
+                AppUserName = member.AppUser!.FirstName + member.AppUser.LastName,
+                Email = member.AppUser.Email!,
+                MemberCode = member.MemberCode,
+                MembershipType = member.MembershipType!.Name ?? string.Empty,
+                AssignedTrainerName = member.AssignedTrainer != null 
+                
+                    ? $"{member.AssignedTrainer.FirstName} {member.AssignedTrainer.LastName}" 
+                    : null,
+                DurationValue = member.DurationValue,
+                MembershipTypeCode = member.MembershipType.Code ?? string.Empty,
+                DurationUnit = member.DurationUnit,
                 AssignedTrainerId = member.AssignedTrainerId,
                 DurationFormatted = $"{member.DurationValue} {member.DurationUnit}",
                 StartDate = member.StartDate,

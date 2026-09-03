@@ -11,14 +11,19 @@ namespace GymApi.Data
     {
         public BarcodeDbContext(DbContextOptions<BarcodeDbContext> options) : base(options) { }
 
-        public DbSet<Barcode> Barcodes { get; set; }
+        public DbSet<BarcodeEntity> Barcodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Barcode>()
+            modelBuilder.Entity<BarcodeEntity>()
                 .HasIndex(b => b.Code)
                 .IsUnique();
+                base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<BarcodeEntity>()
+            .Property(b => b.Types)
+            .HasConversion<string>();
         }
     }
 }

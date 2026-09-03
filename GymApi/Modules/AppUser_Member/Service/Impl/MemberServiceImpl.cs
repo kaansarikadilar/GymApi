@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using GymApi.Mappers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Runtime.CompilerServices;
+using GymApi.Modules.Barcode.Clients;
+using GymApi.Modules.Barcode.Service;
+using GymApi.Modules.Barcode.Service.BarcodeServiceImpl;
 
 namespace GymApi.Service.Impl
 {
@@ -14,17 +17,26 @@ namespace GymApi.Service.Impl
         private readonly IMemberRepository _memberRepo;
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly IBarcodeApiClient _barcodeApi;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         public MemberServiceImpl(
             IMemberRepository memberRepo,
             ApplicationDbContext context,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            IBarcodeApiClient barcodeApi,
+            IHttpContextAccessor httpContextAccessor)
         {
             _memberRepo = memberRepo;
             _context = context;
             _userManager = userManager;
+            _barcodeApi = barcodeApi;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<MemberResponse?> CreateMemberAsync(MemberRequest request)
         {
+            var token = GetAuthorizationToken();
+
             var IsPresent = await _userManager.FindByEmailAsync(request.Email);
             if(IsPresent == null)
             {
@@ -46,10 +58,13 @@ namespace GymApi.Service.Impl
             _ => startDate.AddMonths(request.DurationValue)
         };
         var user = request.ToMember(generatedCode,startDate,endDate,IsPresent);
+        var MemberUser = await _userManager.FindByIdAsync(user.AppUserId);
         
         await _memberRepo.CreateAsync(user);
+        var barcodeResponse = await _barcodeApi.BarcodeGeneration(MemberUser!.Email!,token);
 
-        return user.ToMemberResponse();
+
+        return user.ToMemberResponseFromCreate(barcodeResponse);
         }
         public async Task<MemberResponse?> UpdateMemberAsync(string email, UpdateMemberRequest request)
         {
@@ -92,7 +107,6 @@ namespace GymApi.Service.Impl
             var AllUsers = await _memberRepo.GetAllAsync();
             return AllUsers.Select(m=>m.ToMemberResponse());
         }
-
         public async Task<MemberResponse?> GetByIdAsync(Guid id)
         {
             var user = await _memberRepo.GetByIdAsync(id);
@@ -105,11 +119,15 @@ namespace GymApi.Service.Impl
         public async Task<MemberResponse?> GetMemberByEmail(string email)
         {
             var user = await _memberRepo.GetMemberByEmail(email);
-                if(user == null)
+            if(user == null)
             {
                 return null;
             }
             return user.ToMemberResponse();
+        }
+         private string GetAuthorizationToken()
+        {
+            return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString() ?? string.Empty;
         }
     }
 }
