@@ -3,17 +3,20 @@ using System;
 using GymApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GymApi.Migrations
+namespace GymApi.Migrations.BarcodeDb
 {
     [DbContext(typeof(BarcodeDbContext))]
-    partial class BarcodeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260904082955_FixedTrainer")]
+    partial class FixedTrainer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

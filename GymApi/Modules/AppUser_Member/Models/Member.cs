@@ -24,8 +24,8 @@ namespace GymApi.Models
         public DurationUnit DurationUnit { get; set; } 
 
         // Optional link to an assigned Personal Trainer
-        public string? AssignedTrainerId { get; set; }
-        public AppUser? AssignedTrainer { get; set; }
+        public Guid? AssignedTrainerId { get; set; }
+        public Member? AssignedTrainer { get; set; }
 
         public DateTime StartDate { get; set; } = DateTime.UtcNow;
         public DateTime EndDate { get; set; }

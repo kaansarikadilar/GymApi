@@ -42,12 +42,12 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             var ruleEntities = DetermineBarcodesForMember(user);
 
             var entitiesToSave = ruleEntities
-        .Where(e => !existingBarcodes.Any(existing => existing.Types == e.Types))
-        .ToList();
+            .Where(e => !existingBarcodes.Any(existing => existing.Types == e.Types))
+            .ToList();
 
             if (!entitiesToSave.Any())
             {
-                return existingBarcodes.ToResponseList(user);
+                return existingBarcodes.ToResponseList();
             }
             var savedEntities = new List<BarcodeEntity>();
 
@@ -57,7 +57,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 savedEntities.Add(saved);
             }
 
-            return existingBarcodes.Concat(savedEntities).ToResponseList(user);  
+            return existingBarcodes.Concat(savedEntities).ToResponseList();  
         }
         public async Task<IEnumerable<BarcodeResponse>> ManualBarcodeCreation(BarcodeRequest request)
         {
@@ -78,7 +78,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 var existing = existingBarcodes.FirstOrDefault(b => b.Types == targetType);
                 if (existing != null)
                 {
-                    return new List<BarcodeResponse> { existing.ToBarcodeResponse(user) };
+                    return new List<BarcodeResponse> { existing.ToBarcodeResponse() };
                 }
 
                 // 2. Find if this requested barcode type is valid for the user's membership
@@ -91,7 +91,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
 
                 // 3. Save and return ONLY the specifically requested barcode
                 var saved = await _barcodeRepo.AddBarcodeAsync(entityToSave);
-                return new List<BarcodeResponse> { saved.ToBarcodeResponse(user) };
+                return new List<BarcodeResponse> { saved.ToBarcodeResponse() };
     
             }
             var entitiesToSave = allowedBarcodes
@@ -100,7 +100,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
 
             if (!entitiesToSave.Any())
             {
-                return existingBarcodes.ToResponseList(user);
+                return existingBarcodes.ToResponseList();
             }
 
             var savedEntities = new List<BarcodeEntity>();
@@ -111,7 +111,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             }
 
             var allActiveBarcodes = existingBarcodes.Concat(savedEntities);
-            return allActiveBarcodes.ToResponseList(user);
+            return allActiveBarcodes.ToResponseList();
         }
         private string GetAuthorizationToken()
         {
@@ -219,31 +219,36 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             return new BarcodeEntity
             {
                 MemberId = user.Id,
+                MemberName = user.FullName,
+                MemberCode = memberCode5,
                 Types = BarcodeTypes.GymEntrance,
-                Code = $"SG{memberCode5}{randomSuffix}", // 2 + 5 + 2 = 9 characters
+                Code = $"SG{memberCode5}{randomSuffix}", // 9 chars
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
         }
-        // Exact 4 characters: 2 (prefix) + 2 (random digits)
+
         private BarcodeEntity BuildSpaSaunaBarcode(MemberResponse user)
         {
+            var memberCode5 = GetValidMemberCode(user.MemberCode);
             var randomSuffix = Random.Shared.Next(10, 99).ToString();
 
             return new BarcodeEntity
             {
                 MemberId = user.Id,
+                MemberName = user.FullName,
+                MemberCode = memberCode5,
                 Types = BarcodeTypes.SpaSauna,
-                Code = $"SP{randomSuffix}", // 2 + 2 = 4 characters
+                Code = $"SP{randomSuffix}", // 4 chars
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
         }
-        // Exact 8 characters: 5 (MemberCode) + 3 (session count sequence) e.g., ST101005
+
         private BarcodeEntity BuildPrivateLessonBarcode(MemberResponse user, int remainingSession)
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
@@ -251,14 +256,17 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             return new BarcodeEntity
             {
                 MemberId = user.Id,
+                MemberName = user.FullName,
+                MemberCode = memberCode5,
                 Types = BarcodeTypes.PrivateLesson,
-                Code = $"{memberCode5}{remainingSession:D3}", // 5 + 3 = 8 characters
+                Code = $"{memberCode5}{remainingSession:D3}", // 8 chars
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
         }
+
         private BarcodeEntity BuildGroupLessonBarcode(MemberResponse user)
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
@@ -267,6 +275,8 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             return new BarcodeEntity
             {
                 MemberId = user.Id,
+                MemberName = user.FullName,
+                MemberCode = memberCode5,
                 Types = BarcodeTypes.GroupLesson,
                 Code = $"GD{memberCode5}{randomSuffix}",
                 Email = user.Email,
@@ -280,6 +290,45 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             var clean = (memberCode ?? "ST101").Replace("-", "").Trim().ToUpperInvariant();
             if (clean.Length == 5) return clean;
             return clean.Length > 5 ? clean[..5] : clean.PadRight(5, '0');
+        }
+
+        public Task<IEnumerable<BarcodeResponse>> DeleteBarcodeById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<BarcodeResponse>> DeleteBarcodeByEmail(string Email)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<BarcodeResponse>> DeleteBarcodeByMemberId(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+   
+        public async Task<IEnumerable<BarcodeResponse>> GetBarcodeByEmail(string email)
+        {
+            var barcodes = await _barcodeRepo.GetBarcodeMyMemberEmail(email);
+            return barcodes.ToResponseList();
+        }
+
+        public async Task<IEnumerable<BarcodeResponse>> GetBarcodeByMemberId(Guid memberId)
+        {
+            var barcodes = await _barcodeRepo.GetActiveBarcodesByMemberIdAsync(memberId);
+            return barcodes.ToResponseList();
+        }
+
+        public async Task<BarcodeResponse> GetBarcodeById(int id)
+        {
+            var barcode = await _barcodeRepo.GetByBarcodeIdAsync(id);
+            return barcode?.ToBarcodeResponse()!;
+        }
+
+        public async Task<IEnumerable<BarcodeResponse>> GetAllBarcodes()
+        {
+            var barcodes = await _barcodeRepo.GetAllBarcodes();
+            return barcodes.ToResponseList();
         }
     }
 }

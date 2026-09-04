@@ -1,9 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using GymApi.DTOs.Member;
-using GymApi.Models;
 using GymApi.Modules.Barcode.DTOs;
 using GymApi.Modules.Barcode.Models;
 
@@ -11,23 +7,37 @@ namespace GymApi.Modules.Barcode.Mappers
 {
     public static class BarcodeMapper
     {
-        public static BarcodeResponse ToBarcodeResponse(this BarcodeEntity entity ,MemberResponse user)
+        public static BarcodeResponse ToBarcodeResponse(this BarcodeEntity entity)
         {
-            return new BarcodeResponse{
+            return new BarcodeResponse
+            {
                 Id = entity.Id,
-                MemberName = user.AppUserName,
-                MemberCode = user.MemberCode,
-                Email = user.Email,
+                MemberName = entity.MemberName,
+                MemberCode = entity.MemberCode,
+                Email = entity.Email,
                 Code = entity.Code,
                 BarcodeType = entity.Types,
                 IsActive = entity.IsActive,
-                StartDate = user.StartDate,
-                ExpirationDate = user.EndDate   
+                StartDate = entity.CreatedAt,
+                ExpirationDate = entity.ExpirationDate
             };
         }
-        public static IEnumerable<BarcodeResponse> ToResponseList(this IEnumerable<BarcodeEntity> entities,MemberResponse user)
+
+        public static IEnumerable<BarcodeResponse> ToResponseList(this IEnumerable<BarcodeEntity>? entities)
         {
-            return entities.Select(e => e.ToBarcodeResponse(user));
+            if (entities == null)
+            {
+                return Enumerable.Empty<BarcodeResponse>();
+            }
+            return entities.Select(e => e.ToBarcodeResponse());
+        }
+
+        public static List<BarcodeResponse> ToResponseListForId(this BarcodeEntity entity)
+        {
+            return new List<BarcodeResponse> 
+            { 
+                entity.ToBarcodeResponse() 
+            };
         }
     }
 }

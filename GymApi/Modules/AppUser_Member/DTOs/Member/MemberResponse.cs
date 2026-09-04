@@ -17,7 +17,7 @@ namespace GymApi.DTOs.Member
         public string MembershipType { get; set; } = string.Empty; //VIP,STANDART,OGRENCI
         public string MembershipTypeCode { get; set; } = string.Empty; //VP,ST,OG,KR
         public string? AssignedTrainerName { get; set; } 
-        public string? AssignedTrainerId { get; set; }
+        public Guid? AssignedTrainerId { get; set; }
         public int DurationValue { get; set; }
         public DurationUnit DurationUnit { get; set; }
         public string DurationFormatted { get; set; } = string.Empty;

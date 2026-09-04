@@ -2,24 +2,23 @@
 
 #nullable disable
 
-namespace GymApi.Migrations
+namespace GymApi.Migrations.BarcodeDb
 {
     /// <inheritdoc />
-    public partial class ConvertBarcodeTypesToText : Migration
+    public partial class Loop : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "Types",
+            migrationBuilder.AddColumn<string>(
+                name: "MemberCode",
                 table: "Barcodes",
                 type: "text",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer");
+                defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
-                name: "Email",
+                name: "MemberName",
                 table: "Barcodes",
                 type: "text",
                 nullable: false,
@@ -30,16 +29,12 @@ namespace GymApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Email",
+                name: "MemberCode",
                 table: "Barcodes");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Types",
-                table: "Barcodes",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            migrationBuilder.DropColumn(
+                name: "MemberName",
+                table: "Barcodes");
         }
     }
 }

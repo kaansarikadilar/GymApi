@@ -3,20 +3,17 @@ using System;
 using GymApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GymApi.Migrations
+namespace GymApi.Migrations.BarcodeDb
 {
     [DbContext(typeof(BarcodeDbContext))]
-    [Migration("20260831083620_InitialBarcodeSchema")]
-    partial class InitialBarcodeSchema
+    partial class BarcodeDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,17 +37,30 @@ namespace GymApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("MemberCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("MemberId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Types")
-                        .HasColumnType("integer");
+                    b.Property<string>("MemberName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Types")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

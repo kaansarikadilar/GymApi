@@ -12,9 +12,10 @@ namespace GymApi.Modules.Barcode.Controller.BarcodeControllerImpl
     [ApiController]
     [Route("/GymApi/BarcodeController")]
     [Authorize]
-    public class BarcodeControllerImpl : ControllerBase , IBarcodeController
+    public class BarcodeControllerImpl : ControllerBase, IBarcodeController
     {
         private readonly IBarcodeService _barcodeService;
+
         public BarcodeControllerImpl(IBarcodeService barcodeService)
         {
             _barcodeService = barcodeService;
@@ -27,25 +28,85 @@ namespace GymApi.Modules.Barcode.Controller.BarcodeControllerImpl
             {
                 return BadRequest(ModelState);
             }
-        var barcode = await _barcodeService.BarcodeGeneration(Email);
-            if(barcode == null || !barcode.Any())
+
+            var barcode = await _barcodeService.BarcodeGeneration(Email);
+            if (barcode == null || !barcode.Any())
             {
                 return NotFound("Cannot create barcode. Member not found or requested barcode type is not allowed for this membership."); 
             }
+
             return Ok(barcode);
         }
-        [HttpPost("manual")]
-        public async Task<IActionResult> ManualBarcodeGeneration([FromBody]BarcodeRequest request)
+
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllBarcodes()
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-          var barcode = await _barcodeService.ManualBarcodeCreation(request);
-            if(barcode == null || !barcode.Any())
+
+            var barcodes = await _barcodeService.GetAllBarcodes();
+            return Ok(barcodes ?? Enumerable.Empty<BarcodeResponse>());
+        }
+
+        [HttpGet("Id")]
+        public async Task<IActionResult> GetBarcodeById(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _barcodeService.GetBarcodeById(id);
+            if (response == null)
+            {
+                return NotFound("Cannot find Barcode");
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("ByMemberEmail")]
+        public async Task<IActionResult> GetBarcodeByMemberEmail(string Email)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _barcodeService.GetBarcodeByEmail(Email);
+            // Having 0 barcodes is valid for a new member — returns 200 OK with []
+            return Ok(response ?? Enumerable.Empty<BarcodeResponse>());
+        }
+
+        [HttpGet("ByMemberId")]
+        public async Task<IActionResult> GetBarcodeByMemberId(Guid id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _barcodeService.GetBarcodeByMemberId(id);
+            // Having 0 barcodes is valid — returns 200 OK with []
+            return Ok(response ?? Enumerable.Empty<BarcodeResponse>());
+        }
+
+        [HttpPost("manual")]
+        public async Task<IActionResult> ManualBarcodeGeneration([FromBody] BarcodeRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var barcode = await _barcodeService.ManualBarcodeCreation(request);
+            if (barcode == null || !barcode.Any())
             {
                 return NotFound("Cannot create barcode. Member not found or requested barcode type is not allowed for this membership.");  
             }
+
             return Ok(barcode);
         }
     }

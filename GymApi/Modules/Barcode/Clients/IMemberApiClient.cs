@@ -12,5 +12,7 @@ namespace GymApi.Modules.Barcode.Clients
 
         [Get("/api/members/by-email")]
         Task<MemberResponse?> GetMemberByEmail([Query] string email, [Header("Authorization")] string token);
-    }
+        [Get("/api/members/All")]
+        Task<IEnumerable<MemberResponse>> GetAllMembers([Header("Authorization")] string token);  
+     }
 }

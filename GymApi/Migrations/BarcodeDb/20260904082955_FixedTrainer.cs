@@ -4,10 +4,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GymApi.Migrations
+namespace GymApi.Migrations.BarcodeDb
 {
     /// <inheritdoc />
-    public partial class InitialBarcodeSchema : Migration
+    public partial class FixedTrainer : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,8 @@ namespace GymApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Code = table.Column<string>(type: "text", nullable: false),
-                    Types = table.Column<int>(type: "integer", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Types = table.Column<string>(type: "text", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     MemberId = table.Column<Guid>(type: "uuid", nullable: false),

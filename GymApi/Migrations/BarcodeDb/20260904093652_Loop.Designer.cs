@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GymApi.Migrations
+namespace GymApi.Migrations.BarcodeDb
 {
     [DbContext(typeof(BarcodeDbContext))]
-    [Migration("20260831132601_ConvertBarcodeTypesToText")]
-    partial class ConvertBarcodeTypesToText
+    [Migration("20260904093652_Loop")]
+    partial class Loop
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,8 +50,16 @@ namespace GymApi.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("MemberCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("MemberId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("MemberName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Types")
                         .IsRequired()

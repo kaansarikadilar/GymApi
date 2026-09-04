@@ -25,6 +25,6 @@ namespace GymApi.DTOs.Member
 
         [EnumDataType(typeof(DurationUnit))]
         public DurationUnit DurationUnit { get; set; } = DurationUnit.Month;
-        public string? AssignedTrainerId { get; set; }
+        public Guid? AssignedTrainerId { get; set; }
     }
 }
