@@ -41,6 +41,13 @@ namespace GymApi.Repository.Impl
             {
                 return false;
             }
+            
+            var TrainedUser = _context.Members.Where(a=>a.AssignedTrainerId == user.Id);
+            foreach(var trainee in TrainedUser)
+            {
+                trainee.AssignedTrainerId = null;
+            }
+
             _context.Members.Remove(user);
             await _context.SaveChangesAsync();
             return true;

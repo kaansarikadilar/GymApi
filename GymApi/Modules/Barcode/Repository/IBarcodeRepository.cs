@@ -14,7 +14,8 @@ namespace GymApi.Modules.Barcode.Repository
         Task<BarcodeEntity> AddBarcodeAsync(BarcodeEntity barcodeEntity);
         Task<BarcodeEntity> UpdateBarcodeAsync(BarcodeEntity barcodeEntity);
         Task<bool> DeleteBarcodeById(int id);
-        Task<bool> DeleteByMemberId(Guid id);
+        Task<bool> DeleteBarcodeByEmail(string Email);
+        Task<bool> DeleteBarcodeByMemberId(Guid id);
         Task<BarcodeEntity>GetByBarcodeIdAsync(int id);
         Task<IEnumerable<BarcodeEntity>>GetAllBarcodes();
         Task<IEnumerable<BarcodeEntity>>GetBarcodeByMemberId(Guid id);

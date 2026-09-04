@@ -29,25 +29,36 @@ namespace GymApi.Modules.Barcode.Repository
             .Where(b => b.MemberId == memberId && b.IsActive && b.ExpirationDate > DateTime.UtcNow)
             .ToListAsync();
         }
-        public async Task<bool> DeleteBarcodeById(int id)
-        {
-            var barcode = await _barcodeContext.Barcodes.FindAsync(id);
-            if(barcode != null)
-            {
-            _barcodeContext.Remove(barcode);
-            await _barcodeContext.SaveChangesAsync();
-            return true;
-            }
-            return false;
-        }
-        public async Task<bool> DeleteByMemberId(Guid id)
+        public async Task<bool> DeleteBarcodeByMemberId(Guid id)
         {
             var member = await _barcodeContext.Barcodes.Where(b=>b.MemberId == id).ToListAsync();
             if (!member.Any())
             {
                 return false;
             }
-            _barcodeContext.RemoveRange(member);
+                _barcodeContext.RemoveRange(member);
+                await _barcodeContext.SaveChangesAsync();
+                return true;
+        }
+        public async Task<bool> DeleteBarcodeByEmail(string Email)
+        {
+            var barcode = await _barcodeContext.Barcodes.Where(a=>a.Email == Email).ToListAsync();
+            if(!barcode.Any())
+            {
+                return false;
+            }
+            _barcodeContext.RemoveRange(barcode);
+            await _barcodeContext.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> DeleteBarcodeById(int id)
+        {
+            var barcode = await _barcodeContext.Barcodes.FindAsync(id);
+            if(barcode == null)
+            {
+                return false;
+            }
+            _barcodeContext.Remove(barcode);
             await _barcodeContext.SaveChangesAsync();
             return true;
         }
@@ -87,6 +98,5 @@ namespace GymApi.Modules.Barcode.Repository
             await _barcodeContext.SaveChangesAsync();
             return barcode;
         }
-       
     }
 }

@@ -46,7 +46,7 @@ namespace GymApi.Controller.Impl
         }
 
         [HttpDelete("by-email")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteMember([FromQuery] string email)
         {
             var isDeleted = await _memberService.DeleteMemberAsync(email);

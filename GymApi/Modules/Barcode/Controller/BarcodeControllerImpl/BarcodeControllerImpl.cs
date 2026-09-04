@@ -37,6 +37,54 @@ namespace GymApi.Modules.Barcode.Controller.BarcodeControllerImpl
 
             return Ok(barcode);
         }
+        [HttpDelete("Email")]
+        public async Task<IActionResult> DeleteBarcodeByEmail(string Email)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _barcodeService.DeleteBarcodeByEmail(Email);
+            if (response == false)
+            {
+                return NotFound("Cannot find Barcode");
+            }
+
+            return Ok(new { message = $"Barcode '{Email}' deleted successfully." });
+        }
+        [HttpDelete("BarcodeId")]
+
+        public async Task<IActionResult> DeleteBarcodeById(int id)
+        {
+             if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _barcodeService.DeleteBarcodeById(id);
+            if (response == false)
+            {
+                return NotFound("Cannot find Barcode");
+            }
+
+            return Ok(new { message = $"Barcode '{id}' deleted successfully." });
+        }
+        [HttpDelete("MemberId")]
+
+        public async Task<IActionResult> DeleteBarcodeByMemberId(Guid id)
+        {
+             if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _barcodeService.DeleteBarcodeByMemberId(id);
+            if (response == false)
+            {
+                return NotFound("Cannot find Barcode");
+            }
+            return Ok(new { message = $"Barcode '{id}' deleted successfully." });
+        }
 
         [HttpGet("All")]
         public async Task<IActionResult> GetAllBarcodes()

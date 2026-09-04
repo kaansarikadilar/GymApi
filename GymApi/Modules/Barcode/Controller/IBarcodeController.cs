@@ -12,6 +12,9 @@ namespace GymApi.Modules.Barcode.Controller
         Task<IActionResult>ManualBarcodeGeneration([FromBody]BarcodeRequest request);
         Task<IActionResult>BarcodeGeneration(string Email);
         Task<IActionResult>GetAllBarcodes();
+        Task<IActionResult> DeleteBarcodeById(int id);
+        Task<IActionResult> DeleteBarcodeByEmail(string Email);
+        Task<IActionResult> DeleteBarcodeByMemberId(Guid id);
         Task<IActionResult>GetBarcodeByMemberId(Guid id);
         Task<IActionResult>GetBarcodeById(int id);
         Task<IActionResult>GetBarcodeByMemberEmail(string Email);

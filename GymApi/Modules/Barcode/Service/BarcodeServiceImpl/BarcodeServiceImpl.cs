@@ -10,6 +10,8 @@ using GymApi.Modules.Barcode.DTOs;
 using GymApi.Modules.Barcode.Mappers;
 using GymApi.Modules.Barcode.Models;
 using GymApi.Modules.Barcode.Repository;
+using System.ComponentModel;
+using System.Net.Http.Headers;
 
 namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
 {
@@ -37,7 +39,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 return Enumerable.Empty<BarcodeResponse>();
             }
 
-            // Check existing active barcodes
+            // Check for existing active barcodes
             var existingBarcodes = (await _barcodeRepo.GetActiveBarcodesByMemberIdAsync(user.Id)).ToList();
             var ruleEntities = DetermineBarcodesForMember(user);
 
@@ -74,14 +76,14 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             {
                 var targetType = request.BarcodeType.Value;
 
-                // 1. If user already has this specific barcode, return it
+                //If user already has this specific barcode, return it
                 var existing = existingBarcodes.FirstOrDefault(b => b.Types == targetType);
                 if (existing != null)
                 {
                     return new List<BarcodeResponse> { existing.ToBarcodeResponse() };
                 }
 
-                // 2. Find if this requested barcode type is valid for the user's membership
+                //Find if this requested barcode type is valid for the user's membership
                 var entityToSave = allowedBarcodes.FirstOrDefault(b => b.Types == targetType);
                 if (entityToSave == null)
                 {
@@ -89,7 +91,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                     return Enumerable.Empty<BarcodeResponse>();
                 }
 
-                // 3. Save and return ONLY the specifically requested barcode
+                //Save and return ONLY the specifically requested barcode
                 var saved = await _barcodeRepo.AddBarcodeAsync(entityToSave);
                 return new List<BarcodeResponse> { saved.ToBarcodeResponse() };
     
@@ -117,7 +119,6 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
         {
             return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString() ?? string.Empty;
         }
-
         private List<BarcodeEntity> DetermineBarcodesForMember(MemberResponse user)
         {
             var entities = new List<BarcodeEntity>();
@@ -292,21 +293,23 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             return clean.Length > 5 ? clean[..5] : clean.PadRight(5, '0');
         }
 
-        public Task<IEnumerable<BarcodeResponse>> DeleteBarcodeById(int id)
+        public Task<bool> DeleteBarcodeById(int id)
         {
-            throw new NotImplementedException();
+            var user = _barcodeRepo.DeleteBarcodeById(id);
+            return user;
+        }
+        public Task<bool> DeleteBarcodeByEmail(string Email)
+        {
+            var user = _barcodeRepo.DeleteBarcodeByEmail(Email);
+            return user;
         }
 
-        public Task<IEnumerable<BarcodeResponse>> DeleteBarcodeByEmail(string Email)
+        public Task<bool> DeleteBarcodeByMemberId(Guid id)
         {
-            throw new NotImplementedException();
+            var user = _barcodeRepo.DeleteBarcodeByMemberId(id);
+            return user;
         }
 
-        public Task<IEnumerable<BarcodeResponse>> DeleteBarcodeByMemberId(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-   
         public async Task<IEnumerable<BarcodeResponse>> GetBarcodeByEmail(string email)
         {
             var barcodes = await _barcodeRepo.GetBarcodeMyMemberEmail(email);

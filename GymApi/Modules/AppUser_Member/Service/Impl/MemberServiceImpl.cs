@@ -11,6 +11,7 @@ using GymApi.Models;
 using GymApi.Modules.Barcode.Clients;
 using GymApi.Modules.Barcode.DTOs;
 using GymApi.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymApi.Service.Impl
 {
@@ -72,6 +73,17 @@ namespace GymApi.Service.Impl
             user.AppUser = isPresent;
             user.MembershipType = type;
 
+            if (request.AssignedTrainerId.HasValue)
+            {
+                var trainerMember = await _context.Members
+                .Include(m=>m.AppUser).
+                FirstOrDefaultAsync(m=>m.Id == request.AssignedTrainerId);
+                if(trainerMember?.AppUser == null || !await _userManager.IsInRoleAsync(trainerMember.AppUser, "Trainer"))
+                {
+                    return null;
+                }
+            }
+
             await _memberRepo.CreateAsync(user);
 
             var token = GetAuthorizationToken();
@@ -89,7 +101,6 @@ namespace GymApi.Service.Impl
             {
                 return null;
             }
-
             var type = await _context.MembershipTypes.FindAsync(request.MembershipTypeId);
             if (type == null)
             {
@@ -111,10 +122,22 @@ namespace GymApi.Service.Impl
                 DurationUnit.Year => startDate.AddYears(request.DurationValue),
                 _ => startDate.AddMonths(request.DurationValue)
             };
+            
 
             var user = request.ToMemberFromUpdate(databaseUser, generatedCode, startDate, endDate);
             user.AppUser = existingUser;
             user.MembershipType = type;
+
+            if (request.AssignedTrainerId.HasValue)
+            {
+                var trainerMember = await _context.Members
+                .Include(m=>m.AppUser).
+                FirstOrDefaultAsync(m=>m.Id == request.AssignedTrainerId);
+                if(trainerMember?.AppUser == null || !await _userManager.IsInRoleAsync(trainerMember.AppUser, "Trainer"))
+                {
+                    return null;
+                }
+            }
 
             await _memberRepo.UpdateAsync(user);
 
@@ -124,6 +147,7 @@ namespace GymApi.Service.Impl
 
         public async Task<bool> DeleteMemberAsync(string email)
         {
+            var appendedUser = _context.Members.Where(a=>a.AssignedTrainer !=null);
             var user = await _memberRepo.DeleteAsync(email);
             return user;
         }
