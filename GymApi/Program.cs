@@ -118,8 +118,6 @@ builder.Services.AddScoped<IMemberService,MemberServiceImpl>();
 builder.Services.AddScoped<IMemberRepository,MemberRepositoryImpl>();
 builder.Services.AddScoped<IBarcodeRepository, BarcodeRepositoryImpl>();
 builder.Services.AddScoped<IBarcodeService,BarcodeServiceImpl>();
-
-
 builder.Services
     .AddRefitClient<IBarcodeApiClient>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:5082")); // Standalone Barcode server URL

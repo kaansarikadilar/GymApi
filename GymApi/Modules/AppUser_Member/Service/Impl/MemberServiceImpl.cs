@@ -46,9 +46,9 @@ namespace GymApi.Service.Impl
             if(type == null)
             {
                 return null;
-            }
-            string uniqueSuffix = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
-            string generatedCode = $"{type.Code}-{uniqueSuffix}";   
+            } 
+            string sequenceNumber = Random.Shared.Next(100, 999).ToString();
+            string generatedCode = $"{type.Code}{sequenceNumber}"; // Exactly 5 characters (e.g., ST101)
             DateTime startDate = DateTime.UtcNow;
             DateTime endDate = request.DurationUnit switch
         {

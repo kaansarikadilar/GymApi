@@ -69,29 +69,29 @@ namespace GymApi.Mappers
                 MembershipTypeId = memberRequest.MembershipTypeId,
                 DurationValue = memberRequest.DurationValue,
                 DurationUnit = memberRequest.DurationUnit,
-                AssignedTrainerId = null,
+                AssignedTrainerId = memberRequest.AssignedTrainerId,
                 MemberCode = generatedCode,
                 StartDate = startDate,
                 EndDate = endDate
             };
         }
        public static Member ToMemberFromUpdate(
-    this UpdateMemberRequest memberRequest,
-    Member existingMember,
-    string generatedCode,
-    DateTime startDate,
-    DateTime endDate)
-{
-    existingMember.FirstName = memberRequest.FirstName;
-    existingMember.LastName = memberRequest.LastName;
-    existingMember.MembershipTypeId = memberRequest.MembershipTypeId;
-    existingMember.DurationValue = memberRequest.DurationValue;
-    existingMember.DurationUnit = memberRequest.DurationUnit;
-    existingMember.MemberCode = generatedCode;
-    existingMember.StartDate = startDate;
-    existingMember.EndDate = endDate;
+                                                this UpdateMemberRequest memberRequest,
+                                                Member existingMember,
+                                                string generatedCode,
+                                                DateTime startDate,
+                                                DateTime endDate)
+            {
+                existingMember.FirstName = memberRequest.FirstName;
+                existingMember.LastName = memberRequest.LastName;
+                existingMember.MembershipTypeId = memberRequest.MembershipTypeId;
+                existingMember.DurationValue = memberRequest.DurationValue;
+                existingMember.DurationUnit = memberRequest.DurationUnit;
+                existingMember.MemberCode = generatedCode;
+                existingMember.StartDate = startDate;
+                existingMember.EndDate = endDate;
 
-    return existingMember;
-}
+                return existingMember;
+            }
     }
 }

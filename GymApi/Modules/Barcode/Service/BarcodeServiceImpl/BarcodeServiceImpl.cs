@@ -213,65 +213,73 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
         }
         private BarcodeEntity BuildGymEntrance(MemberResponse user)
         {
-            var prefix = (user.MemberCode ?? "MEM01").Replace("-", "");
-            var shortPrefix = prefix.Length > 4 ? prefix[..4] : prefix.PadRight(4, 'X');
-            
+            var memberCode5 = GetValidMemberCode(user.MemberCode);
+            var randomSuffix = Random.Shared.Next(10, 99).ToString();
+
             return new BarcodeEntity
             {
                 MemberId = user.Id,
                 Types = BarcodeTypes.GymEntrance,
-                // Ensures uniqueness by keeping prefix + GUID random bytes
-                Code = $"GE{shortPrefix}{Guid.NewGuid().ToString("N")[..6]}".ToUpper(),
+                Code = $"SG{memberCode5}{randomSuffix}", // 2 + 5 + 2 = 9 characters
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
         }
-
-        private BarcodeEntity BuildSpaSaunaBarcode(MemberResponse user) => new BarcodeEntity
+        // Exact 4 characters: 2 (prefix) + 2 (random digits)
+        private BarcodeEntity BuildSpaSaunaBarcode(MemberResponse user)
         {
-            MemberId = user.Id,
-            Types = BarcodeTypes.SpaSauna,
-            Code = $"SPA{Guid.NewGuid().ToString("N")[..8]}".ToUpper(),
-            Email = user.Email,
-            IsActive = true,
-            CreatedAt = user.StartDate,
-            ExpirationDate = user.EndDate
-        };
+            var randomSuffix = Random.Shared.Next(10, 99).ToString();
 
+            return new BarcodeEntity
+            {
+                MemberId = user.Id,
+                Types = BarcodeTypes.SpaSauna,
+                Code = $"SP{randomSuffix}", // 2 + 2 = 4 characters
+                Email = user.Email,
+                IsActive = true,
+                CreatedAt = user.StartDate,
+                ExpirationDate = user.EndDate
+            };
+        }
+        // Exact 8 characters: 5 (MemberCode) + 3 (session count sequence) e.g., ST101005
         private BarcodeEntity BuildPrivateLessonBarcode(MemberResponse user, int remainingSession)
         {
-            var prefix = (user.MemberCode ?? "MEM01").Replace("-", "");
-            var shortPrefix = prefix.Length > 4 ? prefix[..4] : prefix.PadRight(4, 'X');
+            var memberCode5 = GetValidMemberCode(user.MemberCode);
 
             return new BarcodeEntity
             {
                 MemberId = user.Id,
                 Types = BarcodeTypes.PrivateLesson,
-                Code = $"PL{shortPrefix}{remainingSession:D3}{Guid.NewGuid().ToString("N")[..4]}".ToUpper(),
+                Code = $"{memberCode5}{remainingSession:D3}", // 5 + 3 = 8 characters
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
         }
-
         private BarcodeEntity BuildGroupLessonBarcode(MemberResponse user)
         {
-            var prefix = (user.MemberCode ?? "MEM01").Replace("-", "");
-            var shortPrefix = prefix.Length > 4 ? prefix[..4] : prefix.PadRight(4, 'X');
+            var memberCode5 = GetValidMemberCode(user.MemberCode);
+            var randomSuffix = Random.Shared.Next(10, 99).ToString();
 
             return new BarcodeEntity
             {
                 MemberId = user.Id,
                 Types = BarcodeTypes.GroupLesson,
-                Code = $"GL{shortPrefix}{Guid.NewGuid().ToString("N")[..6]}".ToUpper(),
+                Code = $"GD{memberCode5}{randomSuffix}",
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
+        }
+        private static string GetValidMemberCode(string? memberCode)
+        {
+            var clean = (memberCode ?? "ST101").Replace("-", "").Trim().ToUpperInvariant();
+            if (clean.Length == 5) return clean;
+            return clean.Length > 5 ? clean[..5] : clean.PadRight(5, '0');
         }
     }
 }
