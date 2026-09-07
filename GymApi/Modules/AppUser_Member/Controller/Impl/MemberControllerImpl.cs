@@ -56,6 +56,20 @@ namespace GymApi.Controller.Impl
             }
             return Ok(new { message = $"User '{email}' deleted successfully." });
         }
+        [HttpDelete("by-memberBarcode")]
+        public async Task<IActionResult> DeleteMemberBarcode([FromQuery]string Email)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+                var isDeleted = await _memberService.DeleteMemberBarcodeAsync(Email);
+            if(!isDeleted)
+            {
+                return NotFound(new { message = $"Could not find or delete member '{Email}'." });
+            }
+            return Ok(new { message = $"User '{Email}' deleted successfully." });
+        }
 
         [HttpGet("All")]
         public async Task<IActionResult> GetAllMembers()

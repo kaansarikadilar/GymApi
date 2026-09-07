@@ -17,11 +17,23 @@ namespace GymApi.Modules.Barcode.Clients
         Task<IEnumerable<BarcodeResponse>> GetAllBarcodes(
             [Header("Authorization")] string token);
 
+        [Delete("/GymApi/BarcodeController/Email")]
+        Task DeleteBarcodeByEmail([Query] string email, 
+            [Header("Authorization")] string token);
+
         [Get("/GymApi/BarcodeController/Id")]
         Task<IEnumerable<BarcodeResponse>> GetBarcodeById(
             [Query] int id, 
             [Header("Authorization")] string token);
-
+       [Put("/GymApi/BarcodeController/Update")]
+        Task<IEnumerable<BarcodeResponse>> BarcodeUpdate(
+            [Body] BarcodeUpdateRequest request,
+            [Header("Authorization")] string token);
+            
+        [Put("/GymApi/BarcodeController/UpdateByMember")] // <-- FIXED ROUTE
+        Task<IEnumerable<BarcodeResponse>> BarcodeUpdateByMember(
+            [Query] string email,
+            [Header("Authorization")] string token);
         [Get("/GymApi/BarcodeController/ByMemberEmail")]
         Task<IEnumerable<BarcodeResponse>> GetBarcodeByMemberEmail(
             [Query] string email, 

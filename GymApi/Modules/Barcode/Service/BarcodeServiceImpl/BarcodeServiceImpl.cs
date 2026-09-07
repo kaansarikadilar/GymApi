@@ -12,6 +12,7 @@ using GymApi.Modules.Barcode.Models;
 using GymApi.Modules.Barcode.Repository;
 using System.ComponentModel;
 using System.Net.Http.Headers;
+using ReactiveUI.Primitives.Advanced;
 
 namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
 {
@@ -58,10 +59,27 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 var saved = await _barcodeRepo.AddBarcodeAsync(entity);
                 savedEntities.Add(saved);
             }
-
+            
             return existingBarcodes.Concat(savedEntities).ToResponseList();  
         }
+           public async Task<IEnumerable<BarcodeResponse?>> UpdateBarcode(BarcodeUpdateRequest request)
+        {
+            return await UpdateBarcodeByMember(request.Email);
+        }
+           public async Task<IEnumerable<BarcodeResponse?>> UpdateBarcodeByMember(string Email)
+        {
+            var token = GetAuthorizationToken();
+            var Member = await _memberApi.GetMemberByEmail(Email,token);
+            if(Member == null)
+            {
+                return Enumerable.Empty<BarcodeResponse>();
+            }
+            await _barcodeRepo.DeactivateBarcodeByEmail(Email);
+
+            return await BarcodeGeneration(Email);
+        }
         public async Task<IEnumerable<BarcodeResponse>> ManualBarcodeCreation(BarcodeRequest request)
+        
         {
             var token = GetAuthorizationToken();
             var user = await _memberApi.GetMemberByEmail(request.Email,token);
@@ -213,9 +231,10 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
           return entities;
         }
         private BarcodeEntity BuildGymEntrance(MemberResponse user)
+
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
-            var randomSuffix = Random.Shared.Next(10, 99).ToString();
+            var randomSuffix = Random.Shared.Next(1000, 9999).ToString();
 
             return new BarcodeEntity
             {
@@ -223,7 +242,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 MemberName = user.FullName,
                 MemberCode = memberCode5,
                 Types = BarcodeTypes.GymEntrance,
-                Code = $"SG{memberCode5}{randomSuffix}", // 9 chars
+                Code = $"SG{memberCode5}{randomSuffix}",
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
@@ -234,7 +253,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
         private BarcodeEntity BuildSpaSaunaBarcode(MemberResponse user)
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
-            var randomSuffix = Random.Shared.Next(10, 99).ToString();
+            var randomSuffix = Random.Shared.Next(1000, 9999).ToString();
 
             return new BarcodeEntity
             {
@@ -242,17 +261,18 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 MemberName = user.FullName,
                 MemberCode = memberCode5,
                 Types = BarcodeTypes.SpaSauna,
-                Code = $"SP{randomSuffix}", // 4 chars
+                Code = $"SP{memberCode5}{randomSuffix}",
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
                 ExpirationDate = user.EndDate
             };
         }
-
+        
         private BarcodeEntity BuildPrivateLessonBarcode(MemberResponse user, int remainingSession)
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
+            var randomSuffix = Random.Shared.Next(1000, 9999).ToString(); // Prevents duplicate key crash!
 
             return new BarcodeEntity
             {
@@ -260,7 +280,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 MemberName = user.FullName,
                 MemberCode = memberCode5,
                 Types = BarcodeTypes.PrivateLesson,
-                Code = $"{memberCode5}{remainingSession:D3}", // 8 chars
+                Code = $"{memberCode5}{remainingSession:D3}{randomSuffix}",
                 Email = user.Email,
                 IsActive = true,
                 CreatedAt = user.StartDate,
@@ -271,7 +291,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
         private BarcodeEntity BuildGroupLessonBarcode(MemberResponse user)
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
-            var randomSuffix = Random.Shared.Next(10, 99).ToString();
+            var randomSuffix = Random.Shared.Next(1000, 9999).ToString();
 
             return new BarcodeEntity
             {

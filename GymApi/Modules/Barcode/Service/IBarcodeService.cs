@@ -11,6 +11,8 @@ namespace GymApi.Modules.Barcode.Service
     {
         Task<IEnumerable<BarcodeResponse>> ManualBarcodeCreation(BarcodeRequest request);
         Task<IEnumerable<BarcodeResponse?>> BarcodeGeneration(string mail);
+        Task<IEnumerable<BarcodeResponse?>> UpdateBarcode(BarcodeUpdateRequest request);
+        Task<IEnumerable<BarcodeResponse?>> UpdateBarcodeByMember(string Email);
         Task<bool> DeleteBarcodeById(int id);
         Task<bool> DeleteBarcodeByEmail(string Email);
         Task<bool> DeleteBarcodeByMemberId(Guid id);

@@ -37,6 +37,35 @@ namespace GymApi.Modules.Barcode.Controller.BarcodeControllerImpl
 
             return Ok(barcode);
         }
+        [HttpPut("Update")]
+        public async Task<IActionResult> BarcodeUpdate([FromBody] BarcodeUpdateRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var Updating = await _barcodeService.UpdateBarcode(request);
+            if(Updating == null)
+            {
+                NotFound("Error when updating Member");
+            }
+            return Ok(Updating);
+        }
+        [HttpPut("UpdateByMember")]
+        public async Task<IActionResult> BarcodeUpdateByMember([FromQuery] string Email)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var Updating = await _barcodeService.UpdateBarcodeByMember(Email);
+            if(Updating == null)
+            {
+                NotFound("Error when updating Member");
+            }
+            return Ok(Updating);
+        }
+
         [HttpDelete("Email")]
         public async Task<IActionResult> DeleteBarcodeByEmail(string Email)
         {

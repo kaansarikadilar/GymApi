@@ -141,15 +141,26 @@ namespace GymApi.Service.Impl
 
             await _memberRepo.UpdateAsync(user);
 
-            var barcodes = await _barcodeApi.BarcodeGeneration(email, token);
+            var barcodes = await _barcodeApi.BarcodeUpdateByMember(email, token);
             return user.ToMemberResponse(barcodes ?? Enumerable.Empty<BarcodeResponse>());
         }
-
         public async Task<bool> DeleteMemberAsync(string email)
         {
-            var appendedUser = _context.Members.Where(a=>a.AssignedTrainer !=null);
             var user = await _memberRepo.DeleteAsync(email);
             return user;
+        }
+        public async Task<bool> DeleteMemberBarcodeAsync(string email)
+        {
+            var token = GetAuthorizationToken();
+            var barcode = await _barcodeApi.GetBarcodeByMemberEmail(email,token);
+            var Member = await _memberRepo.GetMemberByEmail(email);
+            if(Member != null && barcode != null)
+            {
+                await _memberRepo.DeleteAsync(email);
+                await _barcodeApi.DeleteBarcodeByEmail(email,token);
+                return true;
+            }
+            return false;
         }
 
         public async Task<IEnumerable<MemberResponse>> GetAllMembersAsync()
@@ -207,9 +218,11 @@ namespace GymApi.Service.Impl
             return user.ToMemberResponse(barcodes ?? Enumerable.Empty<BarcodeResponse>());
         }
 
+
         private string GetAuthorizationToken()
         {
             return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString() ?? string.Empty;
         }
+
     }
 }

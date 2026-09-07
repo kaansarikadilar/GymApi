@@ -14,5 +14,6 @@ namespace GymApi.Service
         Task<IEnumerable<MemberResponse>> GetAllMembersAsync();
         Task<MemberResponse?> UpdateMemberAsync(string mail, UpdateMemberRequest request);
         Task<bool> DeleteMemberAsync(string email);
+        Task<bool> DeleteMemberBarcodeAsync(string email);
     }
 }

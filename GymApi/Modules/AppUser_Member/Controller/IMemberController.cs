@@ -9,11 +9,12 @@ namespace GymApi.Controller
 {
     public interface IMemberController
     {
-       public Task<IActionResult>CreateMember([FromBody]MemberRequest request); 
-       public Task<IActionResult>DeleteMember(string mail); 
-       public Task<IActionResult>GetAllMembers(); 
-       public Task<IActionResult>GetMemberByEmail(string mail); 
-       public Task<IActionResult>GetMemberById(Guid id); 
-       public Task<IActionResult>UpdateMember(string mail,[FromBody]UpdateMemberRequest request); 
+       Task<IActionResult>CreateMember([FromBody]MemberRequest request); 
+       Task<IActionResult>DeleteMember(string mail); 
+       Task<IActionResult>DeleteMemberBarcode(string mail);
+       Task<IActionResult>GetAllMembers(); 
+       Task<IActionResult>GetMemberByEmail(string mail); 
+       Task<IActionResult>GetMemberById(Guid id); 
+       Task<IActionResult>UpdateMember(string mail,[FromBody]UpdateMemberRequest request); 
     }
 }

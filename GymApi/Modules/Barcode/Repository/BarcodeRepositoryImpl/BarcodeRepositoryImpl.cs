@@ -73,7 +73,7 @@ namespace GymApi.Modules.Barcode.Repository
         {
             return await _barcodeContext.Barcodes
             .AsNoTracking()
-            .Where(a=>a.Email == Email)
+            .Where(a=>a.Email == Email && a.IsActive)
             .ToListAsync();
         }
         public async Task<BarcodeEntity> GetByBarcodeIdAsync(int id)
@@ -92,11 +92,32 @@ namespace GymApi.Modules.Barcode.Repository
             .AsAsyncEnumerable()
             .ToListAsync();
         }
-        public async Task<BarcodeEntity> UpdateBarcodeAsync(BarcodeEntity barcode)
-        {
-            _barcodeContext.Barcodes.Update(barcode);
-            await _barcodeContext.SaveChangesAsync();
-            return barcode;
+        public async Task<bool> DeactivateBarcodeByEmail(string email)
+{
+            var activeBarcodes = await _barcodeContext.Barcodes
+                .Where(b => b.Email == email && b.IsActive)
+                .ToListAsync();
+
+            if (activeBarcodes.Any())
+            {
+                var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
+
+                foreach (var barcode in activeBarcodes)
+                {
+                    if (barcode.CreatedAt <= oneMonthAgo)
+                    {
+                        _barcodeContext.Barcodes.Remove(barcode); // Permanent delete after 1 month
+                    }
+                    else
+                    {
+                        barcode.IsActive = false; // Soft-deactivate
+                    }
+                }
+
+                await _barcodeContext.SaveChangesAsync();
+            }
+
+            return true; // Always return true so the update flow doesn't abort
         }
     }
 }

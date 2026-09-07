@@ -12,7 +12,7 @@ namespace GymApi.Modules.Barcode.Repository
         Task<IEnumerable<BarcodeEntity>> GetActiveBarcodesByMemberIdAsync(Guid memberId);
         Task<IEnumerable<BarcodeEntity>>GetBarcodeMyMemberEmail(string Email);
         Task<BarcodeEntity> AddBarcodeAsync(BarcodeEntity barcodeEntity);
-        Task<BarcodeEntity> UpdateBarcodeAsync(BarcodeEntity barcodeEntity);
+        Task<bool> DeactivateBarcodeByEmail(string Email);
         Task<bool> DeleteBarcodeById(int id);
         Task<bool> DeleteBarcodeByEmail(string Email);
         Task<bool> DeleteBarcodeByMemberId(Guid id);
