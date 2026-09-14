@@ -12,6 +12,7 @@ using GymApi.Modules.Barcode.Clients;
 using GymApi.Modules.Barcode.DTOs;
 using GymApi.Repository;
 using Microsoft.EntityFrameworkCore;
+using GymApi.Helpers;
 
 namespace GymApi.Service.Impl
 {
@@ -123,7 +124,6 @@ namespace GymApi.Service.Impl
                 _ => startDate.AddMonths(request.DurationValue)
             };
             
-
             var user = request.ToMemberFromUpdate(databaseUser, generatedCode, startDate, endDate);
             user.AppUser = existingUser;
             user.MembershipType = type;
@@ -162,32 +162,42 @@ namespace GymApi.Service.Impl
             }
             return false;
         }
-
-        public async Task<IEnumerable<MemberResponse>> GetAllMembersAsync()
+        public async Task<IEnumerable<MemberResponse>> GetAllMembersAsync(MemberQueryObject queryObject)
         {
-            var allUsers = await _memberRepo.GetAllAsync();
+            var allUsers = await _memberRepo.GetAllAsync(queryObject);
             if (!allUsers.Any())
             {
                 return Enumerable.Empty<MemberResponse>();
             }
 
             var token = GetAuthorizationToken();
-            var barcodes = (await _barcodeApi.GetAllBarcodes(token)) ?? Enumerable.Empty<BarcodeResponse>();
+            var allBarcodes = (await _barcodeApi.GetAllBarcodes(token)) ?? Enumerable.Empty<BarcodeResponse>();
 
+            // 1. Filter barcodes based on the IsActive parameter (defaults to active only)
+            var targetBarcodes = queryObject.IsActive.HasValue
+                ? allBarcodes.Where(a => a.IsActive == queryObject.IsActive.Value).ToList()
+                : allBarcodes.Where(a => a.IsActive).ToList();
+
+            // 2. Map members to their barcodes using MemberId first, with email and code fallbacks
             var responses = new List<MemberResponse>();
             foreach (var member in allUsers)
             {
-                // Filter only the barcodes that belong to this specific member
-                var memberBarcodes = barcodes.Where(b => 
-                    string.Equals(b.Email, member.AppUser?.Email, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(b.MemberCode, member.MemberCode, StringComparison.OrdinalIgnoreCase));
+                var memberBarcodes = targetBarcodes.Where(b =>
+                    (!string.IsNullOrWhiteSpace(b.Email) && string.Equals(b.Email.Trim(), member.AppUser?.Email?.Trim(), StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(b.MemberCode) && string.Equals(b.MemberCode.Trim(), member.MemberCode?.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
 
                 responses.Add(member.ToMemberResponse(memberBarcodes));
             }
 
+            // 3. When an explicit IsActive filter is requested, return only members who have matching barcodes
+            if (queryObject.IsActive.HasValue)
+            {
+                responses = responses.Where(m => m.Barcodes != null && m.Barcodes.Any()).ToList();
+            }
+
             return responses;
         }
-
         public async Task<MemberResponse?> GetByIdAsync(Guid id)
         {
             var user = await _memberRepo.GetByIdAsync(id);
@@ -199,7 +209,6 @@ namespace GymApi.Service.Impl
             var token = GetAuthorizationToken();
             var barcodes = await _barcodeApi.GetBarcodeByMemberId(id, token);
 
-            // Never return null if barcodes are empty; return member with an empty barcode collection
             return user.ToMemberResponse(barcodes ?? Enumerable.Empty<BarcodeResponse>());
         }
 
@@ -214,7 +223,6 @@ namespace GymApi.Service.Impl
             var token = GetAuthorizationToken();
             var barcodes = await _barcodeApi.GetBarcodeByMemberEmail(email, token);
 
-            // Never return null if barcodes are empty; return member with an empty barcode collection
             return user.ToMemberResponse(barcodes ?? Enumerable.Empty<BarcodeResponse>());
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GymApi.Data;
+using GymApi.Helpers;
 using GymApi.Modules.Barcode.Clients;
 using GymApi.Modules.Barcode.Models;
 using GymApi.Service;
@@ -85,12 +86,46 @@ namespace GymApi.Modules.Barcode.Repository
             }
             return barcodes;
         }
-         public async Task<IEnumerable<BarcodeEntity>> GetAllBarcodes()
+        public async Task<IEnumerable<BarcodeEntity>> GetAllBarcodes(BarcodeQueryObject query)
         {
-            return await _barcodeContext.Barcodes
-            .AsNoTracking()
-            .AsAsyncEnumerable()
-            .ToListAsync();
+        var barcodes = _barcodeContext.Barcodes.AsNoTracking().AsQueryable();
+
+        // 1. Filter by IsActive without dropping AsNoTracking()
+        if (query.IsActive.HasValue)
+        {
+            barcodes = barcodes.Where(a => a.IsActive == query.IsActive.Value);
+        }
+            // 2. Sorting (with a reliable default fallback when SortBy is empty)
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if (query.SortBy.Equals("IsActive", StringComparison.OrdinalIgnoreCase))
+                {
+                    barcodes = query.IsDescending ? barcodes.OrderByDescending(a => a.IsActive) : barcodes.OrderBy(a => a.IsActive);
+                }
+                else if (query.SortBy.Equals("CreatedAt", StringComparison.OrdinalIgnoreCase))
+                {
+                    barcodes = query.IsDescending ? barcodes.OrderByDescending(a => a.CreatedAt) : barcodes.OrderBy(a => a.CreatedAt);
+                }
+                else if (query.SortBy.Equals("ExpirationDate", StringComparison.OrdinalIgnoreCase))
+                {
+                    barcodes = query.IsDescending ? barcodes.OrderByDescending(a => a.ExpirationDate) : barcodes.OrderBy(a => a.ExpirationDate);
+                }
+                else
+                {
+                    barcodes = barcodes.OrderByDescending(a => a.CreatedAt);
+                }
+            }
+            else
+            {
+                barcodes = barcodes.OrderByDescending(a => a.CreatedAt);
+            }
+            if (query.PageSize <= 0 || query.PageNumber <= 0)
+            {
+                return await barcodes.ToListAsync();
+            }
+
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            return await barcodes.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
         public async Task<bool> DeactivateBarcodeByEmail(string email)
 {
@@ -110,7 +145,7 @@ namespace GymApi.Modules.Barcode.Repository
                     }
                     else
                     {
-                        barcode.IsActive = false; // Soft-deactivate
+                        barcode.IsActive = false; 
                     }
                 }
 

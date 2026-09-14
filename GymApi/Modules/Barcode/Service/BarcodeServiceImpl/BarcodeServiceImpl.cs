@@ -13,6 +13,7 @@ using GymApi.Modules.Barcode.Repository;
 using System.ComponentModel;
 using System.Net.Http.Headers;
 using ReactiveUI.Primitives.Advanced;
+using GymApi.Helpers;
 
 namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
 {
@@ -268,7 +269,7 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
                 ExpirationDate = user.EndDate
             };
         }
-        
+
         private BarcodeEntity BuildPrivateLessonBarcode(MemberResponse user, int remainingSession)
         {
             var memberCode5 = GetValidMemberCode(user.MemberCode);
@@ -348,9 +349,9 @@ namespace GymApi.Modules.Barcode.Service.BarcodeServiceImpl
             return barcode?.ToBarcodeResponse()!;
         }
 
-        public async Task<IEnumerable<BarcodeResponse>> GetAllBarcodes()
+        public async Task<IEnumerable<BarcodeResponse>> GetAllBarcodes(BarcodeQueryObject query)
         {
-            var barcodes = await _barcodeRepo.GetAllBarcodes();
+            var barcodes = await _barcodeRepo.GetAllBarcodes(query);
             return barcodes.ToResponseList();
         }
     }

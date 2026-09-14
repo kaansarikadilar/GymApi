@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GymApi.Helpers;
 using GymApi.Modules.Barcode.DTOs;
 using GymApi.Modules.Barcode.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -116,14 +117,14 @@ namespace GymApi.Modules.Barcode.Controller.BarcodeControllerImpl
         }
 
         [HttpGet("All")]
-        public async Task<IActionResult> GetAllBarcodes()
+        public async Task<IActionResult> GetAllBarcodes([FromQuery]BarcodeQueryObject query)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var barcodes = await _barcodeService.GetAllBarcodes();
+            var barcodes = await _barcodeService.GetAllBarcodes(query);
             return Ok(barcodes ?? Enumerable.Empty<BarcodeResponse>());
         }
 

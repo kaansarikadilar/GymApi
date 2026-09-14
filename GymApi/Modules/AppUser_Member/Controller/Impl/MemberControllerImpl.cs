@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using GymApi.DTOs.Member;
+using GymApi.Helpers;
 using GymApi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,9 +73,13 @@ namespace GymApi.Controller.Impl
         }
 
         [HttpGet("All")]
-        public async Task<IActionResult> GetAllMembers()
+        public async Task<IActionResult> GetAllMembers([FromQuery]MemberQueryObject queryObject)
         {
-            var allUsers = await _memberService.GetAllMembersAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var allUsers = await _memberService.GetAllMembersAsync(queryObject);
             if (allUsers == null)
             {
                 return NotFound("Users cannot be found");

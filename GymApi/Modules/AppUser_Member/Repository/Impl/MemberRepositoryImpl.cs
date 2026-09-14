@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GymApi.Data;
 using GymApi.DTOs.Member;
+using GymApi.Helpers;
 using GymApi.Models;
 using GymApi.Service;
 using Microsoft.AspNetCore.Identity;
@@ -20,7 +21,6 @@ namespace GymApi.Repository.Impl
         {
             _context = context;
         }
-
         public async Task<Member> CreateAsync(Member member)
         {
             await _context.Members.AddAsync(member);
@@ -33,7 +33,6 @@ namespace GymApi.Repository.Impl
             await _context.SaveChangesAsync();
             return member;
         }
-
         public async Task<bool> DeleteAsync(string email)
         {
            var user = await _context.Members.FirstOrDefaultAsync(m=>m.AppUser!.Email == email);
@@ -52,15 +51,58 @@ namespace GymApi.Repository.Impl
             await _context.SaveChangesAsync();
             return true;
         }
-
-        public async Task<IEnumerable<Member>> GetAllAsync()
+        public async Task<IEnumerable<Member>> GetAllAsync(MemberQueryObject queryObject)
         {
-            return await _context.Members
+            var members = _context.Members
             .Include(m=>m.AppUser)
             .Include(m=>m.MembershipType)
             .Include(m=>m.AssignedTrainer)
-            .AsAsyncEnumerable()
-            .ToListAsync();
+            .ThenInclude(t=>t!.AppUser)
+            .AsNoTracking()
+            .AsQueryable();
+
+            if (queryObject.Id.HasValue)
+            {
+                members = _context.Members.Where(a=>a.Id == queryObject.Id.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(queryObject.Email))
+            {
+                members = members.Where(m => m.AppUser != null && m.AppUser.Email!.ToLower().Contains(queryObject.Email.ToLower()));
+            }
+            if (queryObject.DoesTrainer.HasValue)
+            {
+                members = queryObject.DoesTrainer.Value 
+                ? members.Where(a=>a.AssignedTrainer != null)
+                : members.Where(a=>a.AssignedTrainer == null);
+            }
+            if (!string.IsNullOrWhiteSpace(queryObject.SortBy))
+            {
+                if (queryObject.SortBy.Equals("StartDate", StringComparison.OrdinalIgnoreCase))
+                {
+                    members = queryObject.IsDescending 
+                        ? members.OrderByDescending(m => m.StartDate) 
+                        : members.OrderBy(m => m.StartDate);
+                }
+                else if (queryObject.SortBy.Equals("EndDate", StringComparison.OrdinalIgnoreCase))
+                {
+                    members = queryObject.IsDescending 
+                        ? members.OrderByDescending(m => m.EndDate) 
+                        : members.OrderBy(m => m.EndDate);
+                }
+                else if (queryObject.SortBy.Equals("FirstName", StringComparison.OrdinalIgnoreCase))
+                {
+                    members = queryObject.IsDescending 
+                        ? members.OrderByDescending(m => m.FirstName) 
+                        : members.OrderBy(m => m.FirstName);
+                }
+            }
+            else
+            {
+                members = members.OrderByDescending(m => m.StartDate);
+            }
+            var skipNumber = (queryObject.PageNumber -1 ) * queryObject.PageSize;
+
+            return await members.Skip(skipNumber).Take(queryObject.PageSize).ToListAsync();
         }
         public async Task<Member?> GetByAppUserIdAsync(string appUserId)
         {

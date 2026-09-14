@@ -1,3 +1,4 @@
+using GymApi.Helpers;
 using GymApi.Models;
 
 namespace GymApi.Repository
@@ -8,7 +9,7 @@ namespace GymApi.Repository
         Task<Member?> GetByIdAsync(Guid id);
         Task<Member?> GetMemberByEmail(string email);
         Task<Member?> GetByAppUserIdAsync(string appUserId);
-        Task<IEnumerable<Member>> GetAllAsync();
+        Task<IEnumerable<Member>> GetAllAsync(MemberQueryObject queryObject);
         Task<Member> UpdateAsync(Member member);
         Task<bool> DeleteAsync(string email);
     }

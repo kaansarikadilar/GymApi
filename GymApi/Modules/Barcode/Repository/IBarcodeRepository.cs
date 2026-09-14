@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GymApi.Helpers;
 using GymApi.Modules.Barcode.Models;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
@@ -17,7 +18,7 @@ namespace GymApi.Modules.Barcode.Repository
         Task<bool> DeleteBarcodeByEmail(string Email);
         Task<bool> DeleteBarcodeByMemberId(Guid id);
         Task<BarcodeEntity>GetByBarcodeIdAsync(int id);
-        Task<IEnumerable<BarcodeEntity>>GetAllBarcodes();
+        Task<IEnumerable<BarcodeEntity>>GetAllBarcodes(BarcodeQueryObject query);
         Task<IEnumerable<BarcodeEntity>>GetBarcodeByMemberId(Guid id);
     }
 }
